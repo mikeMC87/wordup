@@ -1,0 +1,27 @@
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="0"
+    >
+    
+    <TableRow>
+         <TextView android:text="shake to skip word" 
+                   android:padding="3dip"
+                   />
+         <ToggleButton android:id="@+id/toggle_shake"
+         
+          />
+    </TableRow>
+    
+        <TableRow>
+            <Button android:id="@+id/save_settings_btn" 
+            android:layout_column="1"
+            android:text="save"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+         />
+    </TableRow> 
+    
+    
+</TableLayout>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+
+    >
+
+
+    <ImageView
+        android:id="@+id/game_title"
+        android:src="@drawable/wordup"
+        android:gravity="top"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="3dp"
+        />
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                 android:orientation="horizontal"
+                 android:layout_below="@+id/game_title"
+                 android:layout_gravity="center_vertical|center_horizontal"
+                 android:layout_centerHorizontal="true"
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content">
+
+        <TableRow
+            >
+
+            <Button
+                style="@style/MyTheme"
+                android:id="@+id/play_btn"
+                android:layout_centerHorizontal="true"
+                android:text="play"
+
+                >
+            </Button>
+
+
+            <Button
+                style="@style/MyTheme"
+                android:id="@+id/practice_btn"
+                android:text="practice"
+                android:layout_centerHorizontal="true"
+
+                >
+
+            </Button>
+        </TableRow>
+
+        <TableRow>
+
+            <Button
+                style="@style/MyTheme"
+                android:id="@+id/settings_btn"
+                android:text="settings"
+                android:layout_centerHorizontal="true"
+
+                >
+            </Button>
+
+            <Button
+                style="@style/MyTheme"
+                android:id="@+id/high_scores_btn"
+                android:text="scores"
+                android:layout_centerHorizontal="true"
+                >
+            </Button>
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>

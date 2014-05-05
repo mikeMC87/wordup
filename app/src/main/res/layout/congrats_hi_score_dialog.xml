@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     android:orientation="horizontal" 
+     android:layout_gravity="center_vertical|center_horizontal"
+     android:layout_height="wrap_content" 
+     android:layout_width="wrap_content">
+     <TableRow>
+        
+        <TextView
+            android:text="Enter your name:"
+            android:gravity="left"
+            android:padding="3dip" />
+        <EditText android:id="@+id/enter_name"
+            android:maxLength="8"
+            android:width="200px"
+            />
+     </TableRow>
+     
+     <TableRow>
+            <Button android:id="@+id/submit_btn"
+             android:layout_height="wrap_content" 
+             android:width="200px"
+             android:layout_gravity="center" 
+             android:layout_span="2"
+             android:text = "submit"
+             />
+     
+     
+     </TableRow>
+</TableLayout>
+
+            
