@@ -39,7 +39,7 @@ import java.util.Set;
 public class WordUp extends Activity implements Input.InputReady, /*shakeoff ShakeListener.Shook,*/ DialogInterface.OnDismissListener
 {
 
-   //shakeoff//private ShakeListener shake_listener;
+   //shakeoff//private ShakeListener shake_listener; test
    //shakeoff//private SensorManager m_sensorManager;
 
    private static final int GAME_TIME = 26;
