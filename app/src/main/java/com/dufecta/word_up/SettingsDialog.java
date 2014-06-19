@@ -6,17 +6,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class SettingsDialog extends Dialog
-{
+public class SettingsDialog extends Dialog {
 
-    public SettingsDialog(Context context)
-    {
+    public SettingsDialog(Context context) {
         super(context);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setCanceledOnTouchOutside(true);
@@ -24,11 +21,9 @@ public class SettingsDialog extends Dialog
         setContentView(R.layout.settings_dialog);
 
         Button saveButton = (Button) findViewById(R.id.save_settings_btn);
-        saveButton.setOnClickListener(new View.OnClickListener()
-        {
+        saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 SettingsDialog.this.dismiss();
             }
 
