@@ -157,7 +157,7 @@ public class DBHelper {
         return count;
     }
 
-    public ArrayList<String> get_words_from_pattern(String pattern) {
+    public ArrayList<String> getWordsFromPattern(String pattern) {
         String which_table = "";
         switch (pattern.length()) {
             case 4:
@@ -181,7 +181,7 @@ public class DBHelper {
         return str_list;
     }
 
-    public boolean check_word(String word) {
+    public boolean checkWord(String word) {
         String which_table = "";
         switch (word.length()) {
             case 4:

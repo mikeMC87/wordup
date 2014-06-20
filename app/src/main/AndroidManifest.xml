@@ -6,8 +6,7 @@
 
     <application
         android:icon="@drawable/wordup"
-        android:label="@string/app_name"
-        android:debuggable="true">
+        android:label="@string/app_name">
         <activity
             android:name=".Home"
             android:theme="@style/MyTheme"

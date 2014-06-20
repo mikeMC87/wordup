@@ -13,9 +13,6 @@ public class Block extends TextView {
         setTextSize(40);
         setTypeface(Typeface.MONOSPACE);
         setGravity(Gravity.CENTER);
-        //setWidth(40);
-//        Drawable left = Drawable.createFromPath("/wordup/app/src/main/res/drawable/icon.png");
-//        setCompoundDrawablesWithIntrinsicBounds(left,null,null,null);
     }
 
 }

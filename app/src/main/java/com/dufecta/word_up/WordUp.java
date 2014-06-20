@@ -25,21 +25,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class WordUp extends Activity implements Input.InputReady, /*shakeoff ShakeListener.Shook,*/ DialogInterface.OnDismissListener {
-
-    //shakeoff//private ShakeListener shake_listener; test
-    //shakeoff//private SensorManager m_sensorManager;
+public class WordUp extends Activity implements Input.InputReady, DialogInterface.OnDismissListener {
 
     public static final String PLAY = "PLAY";
     public static final int HINT_PENALTY = -25;
@@ -68,7 +61,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
                         timerThread.interrupt();
 //                         timerThread..stop();
                         timerThread = null;
-                        game_is_now_over();
+                        gameOver();
                     }
                     break;
             }
@@ -98,7 +91,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
     private boolean isGameOver = false;
     private boolean notSubmitted = true;
 
-    private void game_is_now_over() {
+    private void gameOver() {
         isGameOver = true;
 
         // text to show
@@ -115,7 +108,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
         gameOverDialog.setPositiveButton("play again", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                reset_game();
+                resetGame();
             }
         });
         gameOverDialog.setNeutralButton("show words", new OnClickListener() {
@@ -151,7 +144,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
 //        }
     }
 
-    private void reset_game() {
+    private void resetGame() {
         if (playMode.equals(PLAY)) {
             isGameOver = false;
 
@@ -160,7 +153,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
 
             showNextWord();
 
-            timerThread = new Thread(new secondCountDownRunner());
+            timerThread = new Thread(new countdownClock());
             timerThread.start();
 
             seconds = GAME_TIME;
@@ -180,22 +173,6 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
         super.onCreate(savedInstanceState);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
-
-
-        //InputMethodManager inputManager = (InputMethodManager)
-        //getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        //inputManager.showSoftInput(findViewById(R.layout.main), 0);
-        //naaa
-
-        //Intent softkb = new Intent(this, SoftKeyboard.class);
-        //startService(softkb);
-        //shakeoff//shake_listener = new ShakeListener(this);
-
-        //shakeoff// m_sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        //shakeoff//  m_sensorManager.registerListener(shake_listener,
-        //shakeoff//    SensorManager.SENSOR_ACCELEROMETER,
-        //shakeoff//    SensorManager.SENSOR_DELAY_GAME);
 
         dbHelper = new DBHelper(this);
         try {
@@ -286,9 +263,9 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
                 Input next = (Input) textLayout.focusSearch(current, View.FOCUS_RIGHT);
                 if (next == null) {
                     verify();
-                    return true;
+                } else {
+                    next.requestFocus();
                 }
-                next.requestFocus();
                 return true;
         }
         return false;
@@ -297,7 +274,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
     @Override
     public void onDismiss(DialogInterface dialog) {
         if (isGameOver) {
-            game_is_now_over();
+            gameOver();
         } else {
             skipWord();
         }
@@ -309,30 +286,21 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
         wordListDialog.setTitle(wordPattern.replace("_", " _ "));
         wordListDialog.setContentView(R.layout.word_list_dialog);
 
-        TextView hit_words = (TextView) wordListDialog.findViewById(R.id.hit_list_dialog);
-        TextView miss_words = (TextView) wordListDialog.findViewById(R.id.miss_list_dialog);
-        //all_words.layout(10, 10, 10, 10);
+        TextView correctWordsView = (TextView) wordListDialog.findViewById(R.id.hit_list_dialog);
+        TextView missedWordsView = (TextView) wordListDialog.findViewById(R.id.miss_list_dialog);
 
-        String[] hit_word_array = new String[guessedWords.size()];
-        String[] miss_word_array = new String[words.size()];
+        String[] correctWords = guessedWords.toArray(new String[guessedWords.size()]);
+        String[] missedWords = words.toArray(new String[words.size()]);
 
-        int index = 0;
-        for (String s : guessedWords) {
-            hit_word_array[index++] = s;
-        }
-        index = 0;
-        for (String s : words) {
-            miss_word_array[index++] = s;
-        }
-        Arrays.sort(hit_word_array);
-        Arrays.sort(miss_word_array);
-        for (String s : hit_word_array) {
-            hit_words.setText(hit_words.getText() + s + "\n");
-        }
-        for (String s : miss_word_array) {
-            miss_words.setText(miss_words.getText() + s + "\n");
-        }
+        Arrays.sort(correctWords);
+        Arrays.sort(missedWords);
 
+        for (String s : correctWords) {
+            correctWordsView.setText(correctWordsView.getText() + s + "\n");
+        }
+        for (String s : missedWords) {
+            missedWordsView.setText(missedWordsView.getText() + s + "\n");
+        }
 
         wordListDialog.show();
         wordListDialog.setOnDismissListener(this);
@@ -353,64 +321,64 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
         guessedWords.clear();
 
         Random rand = new Random();
-        int word_length = rand.nextInt(3) + 4;
-        totalWordLength = word_length;
+        int wordLength = rand.nextInt(3) + 4;
+        totalWordLength = wordLength;
 
         // get common word from DB
-        String common = dbHelper.get_common_word(word_length);
+        String common = dbHelper.get_common_word(wordLength);
 
-        //Toast.makeText(this, common, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, common, Toast.LENGTH_SHORT).show(); ???
 
         // init vars
-        word = new Object[word_length];
+        word = new Object[wordLength];
         Input input;
         Block block;
 
         // decide how many inputs (blanks) to have
-        int num_inputs, num_blocks;
-        if (word_length < 6) {
-            num_inputs = 2;
+        int numInputs, numBlocks;
+        if (wordLength < 6) {
+            numInputs = 2;
         } else {
-            num_inputs = 3;
+            numInputs = 3;
         }
-        num_blocks = word_length - num_inputs;
+        numBlocks = wordLength - numInputs;
 
         // create the inputs and blocks
-        boolean first_input = true;
+        boolean isFirstInput = true;
         int index = 0;
 
-        while (num_inputs != 0 || num_blocks != 0) {
+        while (numInputs != 0 || numBlocks != 0) {
             boolean flag = rand.nextBoolean();
 
-            if ((flag && num_inputs != 0) || num_blocks == 0) {
+            if ((flag && numInputs != 0) || numBlocks == 0) {
                 hintWord += common.charAt(index);
                 wordPattern += "_";
                 input = new Input(this, this);
 
-                if (first_input) {
+                if (isFirstInput) {
                     first = input;
                     first.requestFocus();
                     first.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
-                    first_input = false;
+                    isFirstInput = false;
                 }
                 word[index++] = input;
                 textLayout.addView(input);
-                num_inputs--;
-            } else if ((!flag && num_blocks != 0) || num_inputs == 0) {
+                numInputs--;
+            } else if ((!flag && numBlocks != 0) || numInputs == 0) {
                 hintWord += common.charAt(index);
                 wordPattern += common.charAt(index);
                 block = new Block(this, common.charAt(index));
                 word[index++] = block;
                 textLayout.addView(block);
-                num_blocks--;
+                numBlocks--;
             }
         }
 
         numWords = totalWords = dbHelper.get_num_words_from_pattern(wordPattern);
         numWordsView.setText(String.valueOf(numWords) + "\nwords\nleft");
 
-        ArrayList<String> word_list = dbHelper.get_words_from_pattern(wordPattern);
-        for (String s : word_list) {
+        List<String> wordList = dbHelper.getWordsFromPattern(wordPattern);
+        for (String s : wordList) {
             words.add(s);
         }
     }
@@ -418,22 +386,18 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
     @Override
     protected void onPause() {
         super.onPause();
-        //shakeoff//m_sensorManager.unregisterListener(shake_listener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //shakeoff// m_sensorManager.registerListener(shake_listener,
-        //shakeoff//	  SensorManager.SENSOR_ACCELEROMETER,
-        //shakeoff//      SensorManager.SENSOR_DELAY_GAME);
 
         Intent intent = getIntent();
         if (intent != null && intent.getAction().equals("com.dufecta.word_up.GAME")) {
             playMode = intent.getStringExtra("MODE");
             //Toast.makeText(this, playMode, Toast.LENGTH_SHORT).show();
         }
-        reset_game();
+        resetGame();
     }
 
     @Override
@@ -458,16 +422,16 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
 
     private void verify() {
         //Toast.makeText(this, "end", Toast.LENGTH_SHORT).show();
-        String whole_word = "";
+        String wholeWord = "";
         for (Object obj : word) {
             TextView letter = (TextView) obj;
-            whole_word += letter.getText();
+            wholeWord += letter.getText();
         }
 
-        if (dbHelper.check_word(whole_word)) {
-            if (guessedWords.contains(whole_word)) {
-                showAlertMessage(REPEAT, "repeat: " + whole_word);
-                clear_inputs();
+        if (dbHelper.checkWord(wholeWord)) {
+            if (guessedWords.contains(wholeWord)) {
+                showAlertMessage(REPEAT, "repeat: " + wholeWord);
+                cleartInputs();
                 return;
             }
 
@@ -476,15 +440,15 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
             ScrollView scrolly = (ScrollView) findViewById(R.id.textAreaScroller);
             scrolly.smoothScrollBy(0, 10000);
 
-            correctTable.setText(correctTable.getText() + whole_word + "  ");
+            correctTable.setText(correctTable.getText() + wholeWord + "  ");
 
             numWordsView.setText(String.valueOf(--numWords) + "\nwords\nleft");
 
-            words.remove(whole_word);
-            guessedWords.add(whole_word);
+            words.remove(wholeWord);
+            guessedWords.add(wholeWord);
 
-            showAlertMessage(CORRECT, whole_word);
-            clear_inputs();
+            showAlertMessage(CORRECT, wholeWord);
+            cleartInputs();
 
             if (numWords == 0) {
                 updatePoints(50 * totalWords);
@@ -497,22 +461,17 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
                 ((TextView) findViewById(R.id.seconds_label)).setTextColor(Color.parseColor("#333333"));
             }
         } else {
-            showAlertMessage(WRONG, whole_word);
-            clear_inputs();
+            showAlertMessage(WRONG, wholeWord);
+            cleartInputs();
         }
     }
 
-    //shakeoff//  @Override
-    //shakeoff//public void shook() {
-    //shakeoff//      skip_word();
-    //shakeoff//  }
-
-    private void updatePoints(int add) {
-        points += add;
+    private void updatePoints(int pointsToAdd) {
+        points += pointsToAdd;
         pointsLabel.setText(String.valueOf(points));
     }
 
-    private void clear_inputs() {
+    private void cleartInputs() {
         for (Object obj : word) {
             if (obj instanceof Input) {
                 Input input = (Input) obj;
@@ -553,54 +512,7 @@ public class WordUp extends Activity implements Input.InputReady, /*shakeoff Sha
         dbHelper.drop_db();
     }
 
-    public void fill_db() {
-        FileInputStream fis = null;
-        try {
-            fis = this.openFileInput("6letter.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        File file = new File("/data/data/com.dufecta.word_up/files/6letter.txt");
-        InputStreamReader in = new InputStreamReader(fis);
-        char[] contents = new char[(int) file.length()];
-        try {
-            in.read(contents);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String buf = new String(contents);
-        String[] strings = buf.split("\n");
-        for (String s : strings) {
-            dbHelper.add_word(s);
-        }
-    }
-
-    public void fill_common_db() {
-        FileInputStream fis = null;
-        try {
-            fis = this.openFileInput("common.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        File file = new File("/data/data/com.dufecta.word_up/files/common.txt");
-        InputStreamReader in = new InputStreamReader(fis);
-        char[] contents = new char[(int) file.length()];
-        try {
-            in.read(contents);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String buf = new String(contents);
-        String[] strings = buf.split("\n");
-        for (String s : strings) {
-            int length = s.length();
-            if (length >= 5 && length <= 7) {
-                dbHelper.add_common_word(s);
-            }
-        }
-    }
-
-    private class secondCountDownRunner implements Runnable {
+    private class countdownClock implements Runnable {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 Message m = new Message();
